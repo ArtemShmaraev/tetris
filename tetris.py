@@ -137,7 +137,7 @@ all_sprites = pygame.sprite.Group()
 class Piece(object):  # *
     def __init__(self, x, y, shape):
         self.x = x
-        self.y = 2
+        self.y = 3
         self.shape = shape
         self.color = shape_colors[shapes.index(shape)]
         #self.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)
