@@ -425,10 +425,9 @@ class Tetris:
                     if not (self.valid_space(current_piece, grid)):
                         current_piece.y -= 1
 
-                if level_time / 1000 > 5:
+                if level_time > 5000:
                     level_time = 0
-                    if level_time > 0.01:
-                        fall_speed -= 0.05
+                    fall_speed -= 0.005
 
                 if fall_time / 1000 > fall_speed:
                     fall_time = 0
