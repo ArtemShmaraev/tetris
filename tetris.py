@@ -137,7 +137,7 @@ all_sprites = pygame.sprite.Group()
 class Piece(object):  # *
     def __init__(self, x, y, shape):
         self.x = x
-        self.y = 2
+        self.y = 3
         self.shape = shape
         self.color = shape_colors[shapes.index(shape)]
         #self.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)
@@ -425,10 +425,9 @@ class Tetris:
                     if not (self.valid_space(current_piece, grid)):
                         current_piece.y -= 1
 
-                if level_time / 1000 > 5:
+                if level_time > 5000:
                     level_time = 0
-                    if level_time > 0.01:
-                        fall_speed -= 0.05
+                    fall_speed -= 0.005
 
                 if fall_time / 1000 > fall_speed:
                     fall_time = 0
