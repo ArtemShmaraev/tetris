@@ -71,7 +71,7 @@ T = [['.0.',
       '.0.', ]]
 
 shapes = [S, Z, I, O, J, L, T]
-#shapes = [O]
+# shapes = [O]
 
 # список цветов для деталей
 shape_colors = [(150, 85, 240), (255, 128, 0), (20, 0, 255), (255, 255, 0), (0, 255, 255), (255, 0, 255),
@@ -89,7 +89,8 @@ def load_image(name, colorkey=None):
     image = pygame.image.load(fullname)
     return image
 
- # класс частиц (отвечает за спецэффекты)
+
+# класс частиц (отвечает за спецэффекты)
 class Particle(pygame.sprite.Sprite):
     # сгенерируем частицы разного размера
     fire = [load_image("2021-01-13-15-30-37_resize_53.png")]
@@ -140,11 +141,11 @@ class Piece(object):  # *
         self.y = 3
         self.shape = shape
         self.color = shape_colors[shapes.index(shape)]
-        #self.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)
+        # self.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)
         self.rotation = 0
 
 
- # класс тетрис
+# класс тетрис
 class Tetris:
     def __init__(self):
         self.s_width = 1920
@@ -156,7 +157,6 @@ class Tetris:
         self.top_left_y = self.s_height - self.play_height - 100
         self.c = random.randint(1, 3)
 
-
     def create_grid(self, locked_pos={}):  # *
         grid = [[(0, 0, 0) for _ in range(10)] for _ in range(20)]
 
@@ -166,7 +166,6 @@ class Tetris:
                     c = locked_pos[(j, i)]
                     grid[i][j] = c
         return grid
-
 
     def convert_shape_format(self, shape):
         positions = []
@@ -182,7 +181,6 @@ class Tetris:
             positions[i] = (pos[0] - 2, pos[1] - 4)
 
         return positions
-
 
     def valid_space(self, shape, grid):
         accepted_pos = [[(j, i) for j in range(10) if grid[i][j] == (0, 0, 0)] for i in range(20)]
@@ -332,18 +330,17 @@ class Tetris:
         sy = self.top_left_y + self.play_height / 2 - 100
 
         # зеленая рамка вокруг "Очки"
-        pygame.draw.rect(surface, (19, 116, 43), (sx -11, sy - 157, 230, 45), 0)
+        pygame.draw.rect(surface, (19, 116, 43), (sx - 11, sy - 157, 230, 45), 0)
         pygame.draw.rect(surface, (0, 0, 0), (sx - 11, sy - 157, 230, 45), 3)
         surface.blit(label, (sx - 3, sy - 150))
-
 
         # last score
         sx = self.top_left_x - 200
         sy = self.top_left_y + 200
         # отображения рекорда при одиночной игре
         if q == -1:
-            pygame.draw.rect(surface, (19, 116, 43), (sx +639, sy + 12, 230, 45), 0)
-            pygame.draw.rect(surface, (0, 0, 0), (sx +639, sy + 12, 230, 45), 3)
+            pygame.draw.rect(surface, (19, 116, 43), (sx + 639, sy + 12, 230, 45), 0)
+            pygame.draw.rect(surface, (0, 0, 0), (sx + 639, sy + 12, 230, 45), 3)
             label = font.render('Рекорд: ' + str(last_score), 1, (255, 255, 255))
             surface.blit(label, (sx + 647, sy + 20))
         # отрисовка положения всех деталей
@@ -371,12 +368,13 @@ class Tetris:
 
         change_piece = False  # возможность смены положения
         run = True
-        current_piece = self.get_shape() # текущее положение детали и сама деталь
+        pause = False
+        current_piece = self.get_shape()  # текущее положение детали и сама деталь
         next_piece = self.get_shape()  # следущая деталь
         clock = pygame.time.Clock()
         fall_time = 0  # время обновления скорости
         fall_speed = 0.3  # скорость
-        level_time = 0 # время игры
+        level_time = 0  # время игры
         score = 0  # колличество очков
 
         while run:
@@ -406,24 +404,34 @@ class Tetris:
                             pygame.display.update()
                         run = False
                         break
-                    if event.key == pygame.K_a or event.key == pygame.K_LEFT:
-                        current_piece.x -= 1
-                        if not (self.valid_space(current_piece, grid)):
-                            current_piece.x += 1
-                    if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
-                        current_piece.x += 1
-                        if not (self.valid_space(current_piece, grid)):
+                    if not pause:
+                        if event.key == pygame.K_a or event.key == pygame.K_LEFT:
                             current_piece.x -= 1
-                    if event.key == pygame.K_w or event.key == pygame.K_UP:
-                        current_piece.rotation += 1
-                        if not (self.valid_space(current_piece, grid)):
-                            current_piece.rotation -= 1
+                            if not (self.valid_space(current_piece, grid)):
+                                current_piece.x += 1
+                        if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
+                            current_piece.x += 1
+                            if not (self.valid_space(current_piece, grid)):
+                                current_piece.x -= 1
+                        if event.key == pygame.K_w or event.key == pygame.K_UP:
+                            current_piece.rotation += 1
+                            if not (self.valid_space(current_piece, grid)):
+                                current_piece.rotation -= 1
+                    if event.key == pygame.K_SPACE:
+                        if pause:
+                            pause = False
+                        else:
+                            pause = True
+                            pause_img = pygame.image.load(path.join(img_dir, "pause.png")).convert_alpha()
+                            win.blit(pause_img, (832, 412))
+                            pygame.display.update()
             if run:
-                keys = pygame.key.get_pressed()
-                if keys[pygame.K_DOWN] or keys[pygame.K_s]:
-                    current_piece.y += 1
-                    if not (self.valid_space(current_piece, grid)):
-                        current_piece.y -= 1
+                if not pause:
+                    keys = pygame.key.get_pressed()
+                    if keys[pygame.K_DOWN] or keys[pygame.K_s]:
+                        current_piece.y += 1
+                        if not (self.valid_space(current_piece, grid)):
+                            current_piece.y -= 1
 
                 if level_time > 5000:
                     level_time = 0
@@ -431,10 +439,11 @@ class Tetris:
 
                 if fall_time / 1000 > fall_speed:
                     fall_time = 0
-                    current_piece.y += 1
-                    if not (self.valid_space(current_piece, grid)) and current_piece.y > 0:
-                        current_piece.y -= 1
-                        change_piece = True
+                    if not pause:
+                        current_piece.y += 1
+                        if not (self.valid_space(current_piece, grid)) and current_piece.y > 0:
+                            current_piece.y -= 1
+                            change_piece = True
 
                 shape_pos = self.convert_shape_format(current_piece)
 
@@ -457,14 +466,15 @@ class Tetris:
                         create_particles((960, 600))
                         create_particles((1060, 600))
 
-                win.fill((0, 126, 178))
-                pygame.draw.rect(win, (113, 71, 39), (0, 900, 2000, 200), 0)
-                pygame.draw.rect(win, (19, 116, 43), (0, 870, 2000, 30), 0)
-                self.draw_window(win, grid, -1, self.c, score, last_score)
-                self.draw_next_shape(next_piece, win, -1)
-                all_sprites.update()
-                all_sprites.draw(win)
-                pygame.display.update()
+                if not pause:
+                    win.fill((0, 126, 178))
+                    pygame.draw.rect(win, (113, 71, 39), (0, 900, 2000, 200), 0)
+                    pygame.draw.rect(win, (19, 116, 43), (0, 870, 2000, 30), 0)
+                    self.draw_window(win, grid, -1, self.c, score, last_score)
+                    self.draw_next_shape(next_piece, win, -1)
+                    all_sprites.update()
+                    all_sprites.draw(win)
+                    pygame.display.update()
 
                 if self.check_lost(locked_positions):
                     image_game_over = pygame.image.load(
@@ -512,6 +522,7 @@ class Duo(Tetris):
         next_piece = [self.get_shape(), self.get_shape()]
         clock = pygame.time.Clock()
         fall_time = 0
+        pause = False
         fall_speed = 0.3
         level_time = 0
         score = [0, 0]
@@ -545,40 +556,49 @@ class Duo(Tetris):
                         run = False
                         break
                     # проверка на нажатие кнопок управления
-                    if event.key == pygame.K_a:
-                        current_piece[0].x -= 1
-                        if not (self.valid_space(current_piece[0], grid[0])):
-                            current_piece[0].x += 1
-                    if event.key == pygame.K_LEFT:
-                        current_piece[1].x -= 1
-                        if not (self.valid_space(current_piece[1], grid[1])):
-                            current_piece[1].x += 1
-                    if event.key == pygame.K_d:
-                        current_piece[0].x += 1
-                        if not (self.valid_space(current_piece[0], grid[0])):
+                    if not pause:
+                        if event.key == pygame.K_a:
                             current_piece[0].x -= 1
-                    if event.key == pygame.K_RIGHT:
-                        current_piece[1].x += 1
-                        if not (self.valid_space(current_piece[1], grid[1])):
+                            if not (self.valid_space(current_piece[0], grid[0])):
+                                current_piece[0].x += 1
+                        if event.key == pygame.K_LEFT:
                             current_piece[1].x -= 1
-                    if event.key == pygame.K_w:
-                        current_piece[0].rotation += 1
-                        if not (self.valid_space(current_piece[0], grid[0])):
-                            current_piece[0].rotation -= 1
-                    if event.key == pygame.K_UP:
-                        current_piece[1].rotation += 1
-                        if not (self.valid_space(current_piece[1], grid[1])):
-                            current_piece[1].rotation -= 1
-
-            keys = pygame.key.get_pressed()
-            if keys[pygame.K_DOWN]:
-                current_piece[1].y += 1
-                if not (self.valid_space(current_piece[1], grid[1])):
-                    current_piece[1].y -= 1
-            if keys[pygame.K_s]:
-                current_piece[0].y += 1
-                if not (self.valid_space(current_piece[0], grid[0])):
-                    current_piece[0].y -= 1
+                            if not (self.valid_space(current_piece[1], grid[1])):
+                                current_piece[1].x += 1
+                        if event.key == pygame.K_d:
+                            current_piece[0].x += 1
+                            if not (self.valid_space(current_piece[0], grid[0])):
+                                current_piece[0].x -= 1
+                        if event.key == pygame.K_RIGHT:
+                            current_piece[1].x += 1
+                            if not (self.valid_space(current_piece[1], grid[1])):
+                                current_piece[1].x -= 1
+                        if event.key == pygame.K_w:
+                            current_piece[0].rotation += 1
+                            if not (self.valid_space(current_piece[0], grid[0])):
+                                current_piece[0].rotation -= 1
+                        if event.key == pygame.K_UP:
+                            current_piece[1].rotation += 1
+                            if not (self.valid_space(current_piece[1], grid[1])):
+                                current_piece[1].rotation -= 1
+                    if event.key == pygame.K_SPACE:
+                        if pause:
+                            pause = False
+                        else:
+                            pause = True
+                            pause_img = pygame.image.load(path.join(img_dir, "pause.png")).convert_alpha()
+                            win.blit(pause_img, (832, 412))
+                            pygame.display.update()
+            if not pause:
+                keys = pygame.key.get_pressed()
+                if keys[pygame.K_DOWN]:
+                    current_piece[1].y += 1
+                    if not (self.valid_space(current_piece[1], grid[1])):
+                        current_piece[1].y -= 1
+                if keys[pygame.K_s]:
+                    current_piece[0].y += 1
+                    if not (self.valid_space(current_piece[0], grid[0])):
+                        current_piece[0].y -= 1
             # ускорение при долгой игре
             if level_time > 5000:
                 level_time = 0
@@ -589,10 +609,11 @@ class Duo(Tetris):
                 if fall_time / 1000 > fall_speed:
                     if i == 1:
                         fall_time = 0
-                    current_piece[i].y += 1
-                    if not (self.valid_space(current_piece[i], grid[i])) and current_piece[i].y > 0:
-                        current_piece[i].y -= 1
-                        change_piece[i] = True
+                    if not pause:
+                        current_piece[i].y += 1
+                        if not (self.valid_space(current_piece[i], grid[i])) and current_piece[i].y > 0:
+                            current_piece[i].y -= 1
+                            change_piece[i] = True
 
             shape_pos = [self.convert_shape_format(current_piece[0]), self.convert_shape_format(current_piece[1])]
 
@@ -653,17 +674,17 @@ class Duo(Tetris):
                     run = False
                     self.update_score(score[i])
                     break
-            if run:
+            if run and not pause:
                 # отрисовка кадра
                 for i in range(2):
                     self.draw_window(win, grid[i], i, self.c[i], score[i], "Duo")
                     self.draw_next_shape(next_piece[i], win, i)
                     all_sprites.update()
                     all_sprites.draw(win)
-                    pygame.display.update()
+                pygame.display.update()
 
 
- # основная функция
+# основная функция
 def main_menu(win):
     run = True
     while run:
@@ -699,7 +720,7 @@ def main_menu(win):
     pygame.display.quit()
 
 
- # запуск программы
+# запуск программы
 pygame.init()
 win = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
